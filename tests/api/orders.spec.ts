@@ -23,3 +23,16 @@ test('包含商品时可以创建订单', async ({ request }) => {
   expect(body.status).toBe('confirmed');
   expect(body.orderId).toMatch(/^ORD-/);
 });
+test('不存在的商品不能创建订单', async ({ request }) => {
+  const response = await request.post('/api/orders', {
+    data: {
+      customerName: '测试用户',
+      address: '上海市浦东新区',
+      items: [999],
+    },
+  });
+
+  expect(response.status()).toBe(400);
+  const body = await response.json();
+  expect(body).toEqual({ error: '商品不存在' });
+});

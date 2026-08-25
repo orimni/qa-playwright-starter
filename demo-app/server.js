@@ -64,6 +64,14 @@ const server = http.createServer(async (req, res) => {
       if (!body.customerName || !body.address || !Array.isArray(body.items) || body.items.length === 0) {
         sendJson(res, 400, { error: '订单信息不完整' }); return;
       }
+      const containsUnknownProduct = body.items.some((id) =>
+      !products.some((product) => product.id === id)
+      );
+
+      if (containsUnknownProduct) {
+        sendJson(res, 400, { error: '商品不存在' });
+        return;
+      }
       sendJson(res, 201, { orderId: `ORD-${Date.now()}`, status: 'confirmed' }); return;
     }
     if (req.method === 'GET') { serveStatic(req, res); return; }
