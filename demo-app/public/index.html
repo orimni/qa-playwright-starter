@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QA Demo Shop</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div><strong>QA Demo Shop</strong><span class="subtitle">自动化测试练习商城</span></div>
+      <button id="cart-button" class="cart-button" data-testid="cart-button" hidden>
+        购物车 <span id="cart-count" data-testid="cart-count">0</span>
+      </button>
+    </header>
+
+    <main class="container">
+      <section id="login-view" data-testid="login-view" class="card">
+        <h1>登录</h1>
+        <p class="hint">练习账号：qa.user / P@ssw0rd</p>
+        <form id="login-form">
+          <label for="username">用户名</label>
+          <input id="username" data-testid="username" required />
+          <label for="password">密码</label>
+          <input id="password" data-testid="password" type="password" required />
+          <button type="submit" data-testid="login-submit">登录</button>
+          <p id="login-error" data-testid="login-error" class="error" role="alert"></p>
+        </form>
+      </section>
+
+      <section id="shop-view" data-testid="shop-view" class="hidden">
+        <div class="section-heading"><h1>商品列表</h1><span id="welcome-message"></span></div>
+        <div id="product-list" class="product-grid" data-testid="product-list"></div>
+      </section>
+
+      <section id="cart-view" data-testid="cart-view" class="card hidden">
+        <h1>确认订单</h1>
+        <div id="cart-items" data-testid="cart-items"></div>
+        <form id="checkout-form">
+          <label for="customer-name">收货人</label>
+          <input id="customer-name" data-testid="customer-name" required />
+          <label for="address">收货地址</label>
+          <input id="address" data-testid="address" required />
+          <button type="submit" data-testid="place-order">提交订单</button>
+          <p id="order-error" data-testid="order-error" class="error" role="alert"></p>
+        </form>
+        <p id="order-success" data-testid="order-success" class="success hidden" role="status"></p>
+        <button id="continue-shopping" data-testid="continue-shopping" class="secondary hidden">继续购物</button>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
