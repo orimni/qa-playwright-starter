@@ -1,7 +1,11 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export class CheckoutPage {
-  constructor(private readonly page: Page) {}
+  readonly orderError: Locator;
+
+  constructor(private readonly page: Page) {
+    this.orderError = page.getByTestId('order-error');
+  }
 
   async expectProductInCart(productName: string) {
     await expect(this.page.getByTestId('cart-items')).toContainText(productName);

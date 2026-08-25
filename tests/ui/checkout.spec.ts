@@ -20,3 +20,17 @@ test('用户可以登录、加购并提交订单', async ({ page }) => {
 
   await expect(page.getByTestId('order-success')).toContainText('订单提交成功');
 });
+test('空购物车不能提交订单', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const shopPage = new ShopPage(page);
+  const checkoutPage = new CheckoutPage(page);
+
+  await loginPage.goto();
+  await loginPage.login('qa.user', 'P@ssw0rd');
+  await loginPage.expectLoggedIn();
+
+  await shopPage.openCart();
+  await checkoutPage.placeOrder('测试用户', '上海市浦东新区');
+
+  await expect(checkoutPage.orderError).toHaveText('订单信息不完整');
+});

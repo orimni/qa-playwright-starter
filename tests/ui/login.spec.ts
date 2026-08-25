@@ -15,5 +15,6 @@ test.describe('登录功能', () => {
     await loginPage.login('qa.user', 'P@ssw0rd');
     await loginPage.expectLoggedIn();
     await expect(page.getByTestId('product-list')).toContainText('Wireless Mouse');
+    await expect(page.getByTestId('product-card')).toHaveCount(3);
   });
 });

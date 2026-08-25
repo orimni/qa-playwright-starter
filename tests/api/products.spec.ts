@@ -7,6 +7,7 @@ test.describe('商品与登录 API', () => {
     const products = await response.json();
     expect(products.length).toBeGreaterThanOrEqual(3);
     expect(products[0]).toEqual(expect.objectContaining({ id: expect.any(Number), name: expect.any(String), price: expect.any(Number) }));
+    expect(response.status()).toBe(200);
   });
 
   test('错误账号不能登录', async ({ request }) => {

@@ -8,3 +8,18 @@ test('空购物车不能创建订单', async ({ request }) => {
   expect(response.status()).toBe(400);
   expect(await response.json()).toEqual({ error: '订单信息不完整' });
 });
+test('包含商品时可以创建订单', async ({ request }) => {
+  const response = await request.post('/api/orders', {
+    data: {
+      customerName: '测试用户',
+      address: '上海市浦东新区',
+      items: [1],
+    },
+  });
+
+  expect(response.status()).toBe(201);
+
+  const body = await response.json();
+  expect(body.status).toBe('confirmed');
+  expect(body.orderId).toMatch(/^ORD-/);
+});
