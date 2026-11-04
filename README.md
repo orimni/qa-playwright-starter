@@ -140,10 +140,3 @@ pip install -r requirements.txt
 | **运行 Python Pytest 接口测试** | `npm run test:python` | 执行 Pytest 接口测试套件 (自动拉起服务) |
 | **查看图形化测试报告** | `npm run report` | 打开 Playwright HTML 测试报告与 Trace |
 
----
-
-## 💼 简历表达与面试对标
-
-在面试中谈及该项目时，建议使用如下表述：
-
-> “我自主搭建了一套端到端质量保障工程，基于 **Playwright + TypeScript** 实现了 UI 全链路的 Page Object Model 封装，并结合 **Python + Requests + Pytest** 搭建了接口自动化套件。针对订单交易核心链路，我重点设计了 **Token 鉴权失效拦截（401）**、**数据驱动边界校验（400）** 以及 **订单价格计算与数据落盘一致性核验**。全套测试集成了 **GitHub Actions CI**，在代码 Push 和 PR 时实现双环境自动触发回归与产物归档。”
