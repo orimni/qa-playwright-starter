@@ -15,42 +15,52 @@
 
 ```mermaid
 flowchart TD
-    subgraph SUT["被测系统 (System Under Test)"]
-        Server["Node.js HTTP 服务 (demo-app/server.js)"]
-        FE["前端单页应用 (HTML5 + CSS + JS)"]
-        API1["/api/login (鉴权与 Token 颁发)"]
-        API2["/api/products (商品契约)"]
-        API3["/api/orders (鉴权门禁 / 价格核算 / 订单持久化)"]
+    subgraph SUT ["被测系统 (System Under Test)"]
+        Server["Node.js HTTP 服务 (server.js)"]
+        App["前端应用 (index.html / app.js)"]
+        AuthAPI["/api/login (Token 颁发)"]
+        OrderAPI["/api/orders (鉴权门禁 / 价格核算 / 持久化)"]
+        ProdAPI["/api/products (商品契约)"]
+        
+        App --> Server
+        AuthAPI --> Server
+        OrderAPI --> Server
+        ProdAPI --> Server
     end
 
-    subgraph PlaywrightSuite["Playwright + TypeScript 测试套件 (15 Tests)"]
-        POM["Page Object Model\n(LoginPage / ShopPage / CheckoutPage)"]
-        UITests["UI 端到端测试 (tests/ui/)\n• 登录正反向\n• 购物车加购与计数\n• 结算与空车防御"]
-        APITests["API 契约测试 (tests/api/)\n• Token 缺失/过期拦截 (401)\n• 数据驱动未知商品/非法格式 (400)\n• 正常下单与价格计算 (201)"]
+    subgraph TS_Tests ["Playwright + TypeScript 测试套件 (15 Tests)"]
+        POM["Page Object Model<br/>(LoginPage / ShopPage / CheckoutPage)"]
+        UITest["UI 端到端测试<br/>(登录正反向 / 加购 / 结算空车拦截)"]
+        APITest["TS 接口自动化测试<br/>(401 鉴权拦截 / 400 边界参数 / 201 正常下单)"]
+        
+        UITest --> POM
+        POM --> App
+        APITest --> AuthAPI
+        APITest --> OrderAPI
+        APITest --> ProdAPI
     end
 
-    subgraph PytestSuite["Python + Requests + Pytest 测试套件 (12 Tests)"]
-        PyConftest["conftest.py (服务自动拉起 / Session 夹具)"]
-        PyAuth["test_auth_api.py (凭证正反向)"]
-        PyProd["test_products_api.py (契约结构与字段类型)"]
-        PyOrders["test_orders_api.py (@pytest.mark.parametrize 数据驱动\n• 401 鉴权拦截\n• 400 边界用例\n• 201 下单与 200 详情回查闭环)"]
+    subgraph PY_Tests ["Python + Requests + Pytest 测试套件 (12 Tests)"]
+        PyFixture["conftest.py (服务自拉起与清理)"]
+        PyAuthTest["test_auth_api.py (凭证正反向校验)"]
+        PyOrderTest["test_orders_api.py (参数化数据驱动 / 价格核算)"]
+        PyProdTest["test_products_api.py (数据契约结构校验)"]
+        
+        PyAuthTest --> AuthAPI
+        PyOrderTest --> OrderAPI
+        PyProdTest --> ProdAPI
+        PyFixture -.-> Server
     end
 
-    subgraph CI["持续集成 (GitHub Actions)"]
-        GHA["Automated QA CI (.github/workflows/playwright.yml)\n• Node 20 & Python 3.11 环境矩阵\n• 双测试套件并行自动化回归\n• 自动生成并上传 HTML 测试报告 & Trace 产物"]
+    subgraph CI_Pipeline ["GitHub Actions CI 流水线"]
+        Runner["Ubuntu 自动化 Runner<br/>(Node 20 + Python 3.11)"]
+        Artifacts["测试产物归档 (HTML Report & Trace)"]
+        Runner --> Artifacts
     end
 
-    FE --> Server
-    API1 --> Server
-    API2 --> Server
-    API3 --> Server
-
-    UITests --> POM --> FE
-    APITests --> API1 & API2 & API3
-    PyAuth & PyProd & PyOrders --> API1 & API2 & API3
-
-    PlaywrightSuite --> GHA
-    PytestSuite --> GHA
+    UITest --> Runner
+    APITest --> Runner
+    PyOrderTest --> Runner
 ```
 
 ---
