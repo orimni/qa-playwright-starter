@@ -3,34 +3,37 @@ import { CheckoutPage } from '../pages/CheckoutPage';
 import { LoginPage } from '../pages/LoginPage';
 import { ShopPage } from '../pages/ShopPage';
 
-test('用户可以登录、加购并提交订单', async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  const shopPage = new ShopPage(page);
-  const checkoutPage = new CheckoutPage(page);
+test.describe('购物车结算与订单提交', () => {
+  test('用户可以登录、加购并正常提交订单', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const shopPage = new ShopPage(page);
+    const checkoutPage = new CheckoutPage(page);
 
-  await loginPage.goto();
-  await loginPage.login('qa.user', 'P@ssw0rd');
-  await loginPage.expectLoggedIn();
+    await loginPage.goto();
+    await loginPage.login('qa.user', 'P@ssw0rd');
+    await loginPage.expectLoggedIn();
 
-  await shopPage.addProduct('Wireless Mouse');
-  await expect(shopPage.cartCount).toHaveText('1');
-  await shopPage.openCart();
-  await checkoutPage.expectProductInCart('Wireless Mouse');
-  await checkoutPage.placeOrder('测试用户', '上海市浦东新区');
+    await shopPage.addProduct('Wireless Mouse');
+    await expect(shopPage.cartCount).toHaveText('1');
+    await shopPage.openCart();
+    await checkoutPage.expectProductInCart('Wireless Mouse');
+    await checkoutPage.placeOrder('测试用户', '上海市浦东新区');
 
-  await expect(page.getByTestId('order-success')).toContainText('订单提交成功');
-});
-test('空购物车不能提交订单', async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  const shopPage = new ShopPage(page);
-  const checkoutPage = new CheckoutPage(page);
+    await expect(page.getByTestId('order-success')).toContainText('订单提交成功');
+  });
 
-  await loginPage.goto();
-  await loginPage.login('qa.user', 'P@ssw0rd');
-  await loginPage.expectLoggedIn();
+  test('空购物车不能提交订单', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const shopPage = new ShopPage(page);
+    const checkoutPage = new CheckoutPage(page);
 
-  await shopPage.openCart();
-  await checkoutPage.placeOrder('测试用户', '上海市浦东新区');
+    await loginPage.goto();
+    await loginPage.login('qa.user', 'P@ssw0rd');
+    await loginPage.expectLoggedIn();
 
-  await expect(checkoutPage.orderError).toHaveText('订单信息不完整');
+    await shopPage.openCart();
+    await checkoutPage.placeOrder('测试用户', '上海市浦东新区');
+
+    await expect(checkoutPage.orderError).toHaveText('订单信息不完整');
+  });
 });

@@ -11,6 +11,8 @@ const products = [
   { id: 3, name: 'USB-C Hub', price: 159.0, description: '多接口扩展坞，支持显示器和高速传输。' },
 ];
 
+const orders = {};
+
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(payload));
@@ -60,19 +62,65 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, { token: 'demo-token', user: { username: body.username } }); return;
     }
     if (req.method === 'POST' && req.url === '/api/orders') {
+      const authHeader = req.headers['authorization'];
+      if (!authHeader || authHeader !== 'Bearer demo-token') {
+        sendJson(res, 401, { error: '未授权或登录已过期' });
+        return;
+      }
+
       const body = await parseBody(req);
       if (!body.customerName || !body.address || !Array.isArray(body.items) || body.items.length === 0) {
         sendJson(res, 400, { error: '订单信息不完整' }); return;
       }
       const containsUnknownProduct = body.items.some((id) =>
-      !products.some((product) => product.id === id)
+        !products.some((product) => product.id === id)
       );
 
       if (containsUnknownProduct) {
         sendJson(res, 400, { error: '商品不存在' });
         return;
       }
-      sendJson(res, 201, { orderId: `ORD-${Date.now()}`, status: 'confirmed' }); return;
+
+      const totalAmount = body.items.reduce((sum, id) => {
+        const item = products.find((p) => p.id === id);
+        return sum + (item ? item.price : 0);
+      }, 0);
+
+      const orderId = `ORD-${Date.now()}`;
+      const orderRecord = {
+        orderId,
+        customerName: body.customerName,
+        address: body.address,
+        items: body.items,
+        totalAmount,
+        status: 'confirmed',
+        createdAt: new Date().toISOString(),
+      };
+      orders[orderId] = orderRecord;
+
+      sendJson(res, 201, {
+        orderId,
+        status: 'confirmed',
+        totalAmount,
+        itemCount: body.items.length,
+      });
+      return;
+    }
+    if (req.method === 'GET' && req.url.startsWith('/api/orders/')) {
+      const authHeader = req.headers['authorization'];
+      if (!authHeader || authHeader !== 'Bearer demo-token') {
+        sendJson(res, 401, { error: '未授权或登录已过期' });
+        return;
+      }
+
+      const orderId = req.url.replace('/api/orders/', '');
+      const order = orders[orderId];
+      if (!order) {
+        sendJson(res, 404, { error: '订单不存在' });
+        return;
+      }
+      sendJson(res, 200, order);
+      return;
     }
     if (req.method === 'GET') { serveStatic(req, res); return; }
     sendJson(res, 405, { error: 'Method not allowed' });

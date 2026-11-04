@@ -1,4 +1,4 @@
-name: Playwright tests
+name: Automated QA CI
 
 on:
   push:
@@ -11,20 +11,37 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-      - name: Install dependencies
+
+      - name: Install Node dependencies
         run: npm ci
-      - name: Install Playwright browser
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
-      - name: Run tests
+
+      - name: Run Playwright Tests (UI & API)
         run: npm test
-      - name: Upload report
+
+      - name: Run Pytest Tests (Python API Suite)
+        run: pytest python-tests
+
+      - name: Upload Playwright Report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
